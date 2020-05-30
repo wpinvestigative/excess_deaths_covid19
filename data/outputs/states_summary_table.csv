@@ -1,0 +1,51 @@
+Place,All deaths,Excess deaths,Covid-19 deaths,Covid-19 % of excess,Week 18,Week 19,lag,order,lag_index
+AK,737,-25,10,,Within range,Within range,Significant reporting lag,none,0.726344884556485
+AL,10480,738,469,64,Higher than baseline range,Higher than baseline range,Significant reporting lag,minor,0.879932137054781
+AR,6233,118,86,73,Within range,Higher than baseline range,Some reporting lag,minor,0.925940572286195
+AZ,13374,1424,573,40,Higher than baseline range,Higher than baseline range,Some reporting lag,minor,0.935436042297911
+CA,56590,4752.5,2771,58,Higher than baseline range,Higher than baseline range,Least reporting lag,major,0.990949203715835
+CO,9368,1506,1118,74,Higher than baseline range,Higher than baseline range,Least reporting lag,moderate,0.971384564753282
+DC,1479,354,274,77,Higher than baseline range,Higher than baseline range,Significant reporting lag,moderate,0.819974307662643
+DE,1936,483,221,46,Higher than baseline range,Higher than baseline range,Significant reporting lag,major,0.580254970543565
+FL,44306,2750,1838,67,Higher than baseline range,Higher than baseline range,Least reporting lag,minor,0.968510903778256
+GA,17338,2006,1286,64,Higher than baseline range,Higher than baseline range,Significant reporting lag,minor,0.850966997811486
+HI,2206,-30.5,15,,Within range,Within range,Least reporting lag,moderate,0.998496755722935
+IA,6035,79,269,,Higher than baseline range,Higher than baseline range,Least reporting lag,moderate,0.974583113833874
+ID,2865,49,64,,Within range,Within range,Some reporting lag,moderate,0.93730523568952
+IL,25700,5352,3330,62,Higher than baseline range,Higher than baseline range,Least reporting lag,moderate,0.966417078841556
+IN,14386,1730,1482,86,Higher than baseline range,Higher than baseline range,Some reporting lag,moderate,0.927401201868574
+KS,5216,60,186,,Within range,Within range,Least reporting lag,moderate,0.970296115418682
+KY,8964,261,321,,Within range,Within range,Significant reporting lag,moderate,0.794915552518633
+LA,10561,2766,1887,68,Higher than baseline range,Higher than baseline range,Significant reporting lag,moderate,0.809284980148399
+MA,17453,5907,4971,84,Higher than baseline range,Higher than baseline range,Least reporting lag,moderate,0.965910707801303
+MD,12330,2642,1759,67,Higher than baseline range,Higher than baseline range,Some reporting lag,major,0.949186980223104
+ME,2931,-16,59,,Within range,Within range,Least reporting lag,moderate,1.02383220330949
+MI,24107,5363,3986,74,Higher than baseline range,Higher than baseline range,Some reporting lag,major,0.931176723974738
+MN,9308,572,597,,Higher than baseline range,Higher than baseline range,Some reporting lag,major,0.91613364924005
+MO,12537,775,526,68,Higher than baseline range,Higher than baseline range,Significant reporting lag,minor,0.894162243472608
+MS,6762,836,414,50,Higher than baseline range,Higher than baseline range,Some reporting lag,minor,0.964038799194343
+MT,1969,1,20,,Within range,Within range,Some reporting lag,minor,0.947348134926247
+ND,1063,-406.5,21,,Lower than baseline range,Lower than baseline range,Some reporting lag,minor,0.955904177271168
+NE,3350,73,97,,Within range,Within range,Significant reporting lag,moderate,0.908026790144781
+NH,2590,168,135,80,Within range,Higher than baseline range,Least reporting lag,moderate,1.03284028686805
+NJ,28130,13972,10130,73,Higher than baseline range,Higher than baseline range,Least reporting lag,major,0.987763941069931
+NM,3631,131,195,,Within range,Higher than baseline range,Significant reporting lag,major,0.832793152712581
+NV,5284,169,304,,Within range,Within range,Some reporting lag,moderate,0.94541005996076
+NY,29856,10668,8258,77,Higher than baseline range,Higher than baseline range,Some reporting lag,major,0.949319684534528
+NYC,33897,23615,17135,73,Higher than baseline range,Higher than baseline range,Least reporting lag,major,1.00930837967261
+OH,23818,883,1277,,Higher than baseline range,Higher than baseline range,Significant reporting lag,moderate,0.835961813604937
+OK,7069,-213,245,,Lower than baseline range,Lower than baseline range,Significant reporting lag,minor,0.899145130996701
+OR,7209,247,159,64,Within range,Within range,Significant reporting lag,moderate,0.907277079479069
+PA,28651,3345.5,4333,,Higher than baseline range,Higher than baseline range,Some reporting lag,moderate,0.946331873768634
+RI,2228,322,398,,Higher than baseline range,Higher than baseline range,Significant reporting lag,moderate,0.80428494181906
+SC,10514,1087,332,31,Higher than baseline range,Higher than baseline range,Some reporting lag,minor,0.943000276304544
+SD,1578,-26,45,,Within range,Within range,Some reporting lag,minor,0.954260268809287
+TN,14931,622,260,42,Within range,Within range,Some reporting lag,minor,0.921202706311888
+TX,40978,2870,1134,40,Higher than baseline range,Higher than baseline range,Significant reporting lag,minor,0.911745818484962
+UT,3922,102,69,68,Within range,Within range,Least reporting lag,minor,1.00912393033757
+VA,15055,1845,981,53,Higher than baseline range,Higher than baseline range,Some reporting lag,moderate,0.921202706311888
+VT,1242,152,46,30,Within range,Within range,Least reporting lag,moderate,1.01334857469417
+WA,12095,1062,866,82,Within range,Higher than baseline range,Least reporting lag,moderate,0.96855094712801
+WI,11160,552,430,78,Higher than baseline range,Higher than baseline range,Least reporting lag,minor,0.990949203715835
+WV,3962,6,66,,Within range,Lower than baseline range,Significant reporting lag,minor,0.685774253959592
+WY,914,-6.5,3,,Lower than baseline range,Within range,Significant reporting lag,minor,0.901973663882173

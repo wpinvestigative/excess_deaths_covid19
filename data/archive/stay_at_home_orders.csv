@@ -1,0 +1,54 @@
+state,type_of_order,restrictions,Last checked
+Alabama,Statewide stay-at-home order,minor,5/21/20
+Alaska,Statewide physical distancing mandate,none,5/13/20
+Arizona,Statewide stay-at-home order,minor,5/13/20
+Arkansas,,minor,5/13/20
+California,Statewide stay-at-home order,major_variance,5/13/20
+Colorado,Statewide stay-at-home order,moderate,5/13/20
+Connecticut,Statewide stay-at-home order,major,5/13/20
+Delaware,Statewide shelter-in-place order,major,5/13/20
+District of Columbia,Districtwide stay-at-home order,moderate,5/13/20
+Florida,Statewide stay-at-home order,minor,5/13/20
+Georgia,Statewide shelter-in-place order,minor,5/13/20
+Hawaii,Statewide stay-at-home order,moderate,5/13/20
+Idaho,Statewide stay-at-home order,moderate,5/15/20
+Illinois,Statewide stay-at-home order,moderate_variance,5/14/20
+Indiana,Statewide stay-at-home order,moderate_variance,5/14/20
+Iowa,,moderate,5/14/20
+Kansas,Statewide stay-at-home order,moderate,5/21/20
+Kentucky,Statewide healthy-at-home order,moderate,5/21/20
+Louisiana,Statewide stay-at-home order,moderate_variance,5/14/20
+Maine,Statewide stay-at-home order,moderate_variance,5/15/20
+Maryland,Statewide stay-at-home order,major_variance,5/15/20
+Massachusetts,Statewide stay-at-home advisory,moderate,
+Michigan,Statewide stay-at-home order,major_variance,5/21/20
+Minnesota,Statewide stay-at-home order,major,
+Mississippi,Statewide healthy-at-home order,minor,5/21/20
+Missouri,Statewide stay-at-home order,minor,
+Montana,Statewide stay-at-home order,minor,
+Nebraska,,moderate,5/21/20
+Nevada,Statewide stay-at-home order,moderate,
+New Hampshire,Statewide stay-at-home order,moderate,
+New Jersey,Statewide stay-at-home order,major,
+New Mexico,Statewide stay-at-home order,major,5/22/20
+New York,Statewide order: “New York State on PAUSE”,major,
+North Carolina,Statewide stay-at-home order,moderate,5/21/20
+North Dakota,,minor,
+Ohio,Statewide stay-at-home order,moderate,
+Oklahoma,,minor,5/22/20
+Oregon,Statewide stay-at-home order,moderate_variance,
+Pennsylvania,Statewide stay-at-home order,moderate_variance,
+Puerto Rico,,moderate,
+Rhode Island,Statewide stay-at-home order,moderate,
+South Carolina,Statewide stay-at-home order,minor,
+South Dakota,,minor,
+Tennessee,Statewide stay-at-home order,minor_variance,
+Texas,Statewide stay-at-home order,minor_variance,
+U.S. Virgin Islands,,minor,
+Utah,,minor_variance,
+Vermont,Statewide stay-at-home order,moderate,
+Virginia,Statewide stay-at-home order,moderate_variance,
+Washington,Statewide stay-at-home order,moderate_variance,
+West Virginia,Statewide stay-at-home order,minor,
+Wisconsin,Statewide stay-at-home order,minor_variance,
+Wyoming,,minor,
