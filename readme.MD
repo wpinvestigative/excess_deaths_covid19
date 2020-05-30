@@ -19,6 +19,13 @@
 * `00_package_prep.R` - follow instructions to make sure correct packages are installed
 * `01_xxx` - `04_xxx` - Run scripts in order to generate data used in analysis
 
+# Excess deaths
+
+Higher-than-normal mortality is a starting point for scientists seeking to understand the full impact of the pandemic.
+
+Deaths announced in the early part March and April, based on reports from state public health departments, failed to capture the full impact of the pandemic. Those incomplete numbers were widely cited at a time when many states were making critical decisions about closing businesses and taking other actions to stem the spread of the virus.
+
+Excess deaths are not necessarily attributable directly to covid-19. They could include people who died because of the epidemic but not from the disease, such as those who were afraid to seek medical treatment for unrelated illnesses, as well as some number of deaths that are part of the ordinary variation in the death rate. The count is also affected by increases or decreases in other categories of deaths, such as suicides, homicides and motor vehicle accidents.
 
 # Methodology
 
