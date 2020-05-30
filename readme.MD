@@ -19,6 +19,13 @@
 * `00_package_prep.R` - follow instructions to make sure correct packages are installed
 * `01_xxx` - `04_xxx` - Run scripts in order to generate data used in analysis
 
-# What is this data?
 
-**Explanation to come soon**
+# Methodology
+
+This is a data and scripts used for the state-by-state analysis of excess deaths in each state. It's a reproduction of the [methodology and tools](https://github.com/weinbergerlab/excess_pi_covid) laid out by a research team led by the Yale School of Public Health, which used historical data on all deaths between 2015 and early 2020, published by the National Center for Health Statistics (NCHS), to model the number of deaths that would normally be expected each week from March 1 to May 9 in the U.S. and most states. The estimate takes into account seasonal variations, intensity of flu epidemics and year-to-year variations in mortality levels.
+
+NCHS data are collected from state health departments, which vary significantly in how quickly they report deaths. The Yale [analysis](https://github.com/weinbergerlab/excess_pi_covid/blob/master/post%20methods.pdf) adjusts the baseline in each state to reflect those differences. In states that have been slow to report deaths to the NCHS, the baseline for expected deaths in recent periods is adjusted downward.
+
+The number of overall deaths and covid-19 deaths are not modeled or estimated. They are observed deaths. These data were obtained from [provisional death data](https://www.cdc.gov/nchs/nvss/vsrr/covid19/index.htm) published weekly by the NCHS, which are based on the state in which each person’s death occurred, not on the state of the person’s residence. For privacy reasons, the NCHS does not publicly report deaths from states that had fewer than 10 covid-19 fatalities in any given week. For those weeks in those states, the Yale-led analysis used data compiled by The Post from state health departments.
+
+Figures for North Carolina and Connecticut were not up to date, and those states are not included in this analysis. Pennsylvania is reporting deaths after significant lag and actual death counts for 2020 are most likely underestimated, according to NCHS.
