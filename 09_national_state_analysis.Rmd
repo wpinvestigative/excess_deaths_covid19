@@ -1,0 +1,306 @@
+---
+title: "National and state excess deaths analysis"
+author: "Andrew Ba Tran"
+date: "6/30/2020"
+output:
+  html_document:
+    code_folding: hide
+---
+
+```{r prep, warning=F, message=F}
+
+packages <- c("tidyverse", "lubridate", "writexl", "knitr",
+              "MMWRweek")
+
+if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packages, rownames(installed.packages())), repos = "http://cran.us.r-project.org")  
+}
+
+options(knitr.kable.NA = '')
+
+library(tidyverse)
+library(lubridate)
+library(writexl)
+library(knitr)
+library(MMWRweek)
+
+nat <- read_csv("data/outputs/national_and_state_summary.csv") %>% 
+  filter(state=="US.agg") %>% 
+  rename(covid19.nchs=covid.death.hybrid)
+
+dates <- MMWRweek(nat$week_start_date)
+
+nat$year <- dates$MMWRyear
+nat$day <- dates$MMWRday
+nat$week <- dates$MMWRweek
+```
+
+```{r national_weekly_chart, warning=F, message=F, fig.width=9, fig.height=4}
+weeks_in <- 1:24
+weeks_march <- 10:24
+
+natlsum_ad <- nat %>%
+  filter(year==2020) %>% 
+  filter(week %in% weeks_in)
+
+national_weekly <- natlsum_ad %>% 
+  select(week, week_end_date, year,
+                     all_cause_deaths, expected_all_cause=baseline_all_cause,
+                     expected_all_cause_upper=baseline_all_cause_upper, 
+                     expected_all_cause_lower=baseline_all_cause_lower,
+                     excess_all_cause_deaths, covid19.nchs)
+
+natlsum_ad %>% 
+  ggplot(aes(week_end_date,all_cause_deaths)) +
+  geom_ribbon(aes(ymin=baseline_all_cause_lower, ymax=baseline_all_cause_upper), fill="gray70", alpha=.5) +
+  geom_ribbon(aes(ymin=baseline_all_cause, ymax=all_cause_deaths), fill="sienna1", alpha=.5) +
+  geom_ribbon(aes(ymin=all_cause_deaths-covid19.nchs, ymax=all_cause_deaths), fill="tomato3", alpha=.5) +
+  geom_line(data=natlsum_ad, aes(x=week_end_date, y=all_cause_deaths),color="sienna1", alpha=.4) +
+  geom_line(color="black", size=1) +
+  theme_minimal() +
+  labs(title="U.S. Deaths", y="Weekly deaths", x="") 
+
+```
+
+```{r states, warning=F, message=F}
+
+state_lag <- read_csv("data/outputs/NobBs.complete.csv")
+
+state.abb <- c(state.abb, "DC", "NYC")
+state.name <- c(state.name, "District of Columbia", "New York City")
+state_names <- data.frame(state.abb, state.name)
+
+state_lag_long <- state_lag %>%
+  filter(week==4) %>% 
+  pivot_longer(cols=3:ncol(state_lag),
+               names_to="state",
+               values_to="lag") %>% 
+  mutate(quantile_rank=ntile(lag, 3)) %>% 
+  select(-X1, -week) %>% 
+  left_join(state_names, by=c("state"="state.name")) %>% 
+  select(-state) %>% 
+  rename(state=state.abb)
+
+states <- read_csv("data/outputs/national_and_state_summary.csv") %>% 
+  filter(state!="US" & state!="US.agg") %>% 
+  rename(covid19.nchs=covid.death.hybrid) %>% 
+  ungroup() %>% 
+  left_join(state_lag_long)
+
+orders <- read_csv("data/archive/stay_at_home_orders.csv") %>%   
+  left_join(state_names, by=c("state"="state.name")) %>% 
+  select(-state, state=state.abb)
+
+states <- left_join(states, orders)
+
+states <- states %>% 
+  mutate(restriction_type=gsub("_variance", "", restrictions))
+states$restriction_type = ifelse(states$state=="NYC", "major", states$restriction_type)
+```
+
+```{r week15, warning=F, message=F}
+states_23 <- states %>% 
+  filter(year==2020) %>% 
+  filter(week==23) %>% 
+  mutate(flag = case_when(
+    all_cause_deaths < baseline_all_cause_lower ~ "Lower than baseline range",
+    all_cause_deaths > baseline_all_cause_upper ~ "Higher than baseline range",
+    TRUE ~ "Within range"
+  )) %>% 
+  select(state, flag23=flag)
+
+states_24 <- states %>% 
+  filter(year==2020) %>% 
+  filter(week==24) %>% 
+  mutate(flag = case_when(
+    all_cause_deaths < baseline_all_cause_lower ~ "Lower than baseline range",
+    all_cause_deaths > baseline_all_cause_upper ~ "Higher than baseline range",
+    TRUE ~ "Within range"
+  )) %>% 
+  select(state, flag24=flag)
+```
+
+```{r beautiful_states, warning=F, message=F}
+march <- states %>% 
+  filter(year==2020) %>% 
+  filter(week %in% weeks_march) %>% 
+  group_by(state) %>%
+  summarize(all_cause_deaths=sum(all_cause_deaths, na.rm=T),
+            expected=sum(baseline_all_cause, na.rm=T),
+            excess_deaths=sum(excess_all_cause_deaths, na.rm=T),
+            covid_deaths=sum(covid19.nchs, na.rm=T),
+            x_excess_covid=round(excess_deaths/covid_deaths,1),
+            excess_minus_covid=excess_deaths-covid_deaths
+            ) %>% 
+  mutate(percent_covid_in_excess=round(covid_deaths/excess_deaths*100)) %>% 
+  ungroup() %>% 
+  left_join(states_23) %>% 
+  left_join(states_24) 
+
+
+march$percent_covid_in_excess <- ifelse(march$percent_covid_in_excess >100, NA, march$percent_covid_in_excess)
+march$percent_covid_in_excess <- ifelse(march$percent_covid_in_excess <0, NA, march$percent_covid_in_excess)
+
+march <- unique(march)
+march <- march %>% 
+  mutate(percent_more=round((all_cause_deaths-expected)/expected*100,2))
+march <- march %>% 
+  left_join(state_lag_long) %>% 
+  left_join(orders)  %>% 
+  mutate(restriction_type=gsub("_variance", "", restrictions))
+
+higher <- march %>% 
+  filter(flag24=="Higher than baseline range") %>% 
+  pull(state)
+
+within <- march %>% 
+  filter(flag24=="Within range") %>% 
+  pull(state)
+
+lower <- march %>% 
+  filter(flag24=="Lower than baseline range") %>% 
+  pull(state)
+march$restriction_type = ifelse(march$state=="NYC", "major", march$restriction_type)
+
+
+major <- march %>% 
+  filter(restriction_type=="major") %>% 
+  pull(state)
+
+minor <- march %>% 
+  filter(restriction_type=="minor") %>% 
+  pull(state)
+
+moderate <- march %>% 
+  filter(restriction_type=="moderate") %>% 
+  pull(state)
+
+
+none <- march %>% 
+  filter(restriction_type=="none") %>% 
+  pull(state)
+
+
+
+
+```
+
+```{r pretty_table2, warning=F, message=F}
+nat_solo <- national_weekly %>% 
+  filter(year==2020) %>% 
+  filter(week %in% weeks_march) %>% 
+  #filter(week %in% 10:14) %>% 
+  ungroup() %>% 
+  summarize(all_deaths=sum(all_cause_deaths),
+            excess_deaths=sum(excess_all_cause_deaths),
+            covid19.nchs=sum(covid19.nchs)) %>% 
+  mutate(percent_covid_in_excess=round(covid19.nchs/excess_deaths*100)) %>% 
+  mutate(Place="U.S.") %>% 
+  select(Place, all_deaths, excess_deaths, covid19.nchs, percent_covid_in_excess)
+
+flagged_states <- march %>% 
+# change flag here maybe
+    filter(flag23=="Higher than baseline range" & flag24=="Higher than baseline range") %>% 
+  filter(excess_deaths >0) %>% 
+  filter(x_excess_covid >1) %>% 
+  select(Place=state, all_deaths=all_cause_deaths,
+         excess_deaths=excess_deaths, covid19.nchs=covid_deaths,
+         percent_covid_in_excess) 
+
+nice_table <- rbind(nat_solo, flagged_states) %>% 
+  mutate(excess_minus=excess_deaths-covid19.nchs) %>% 
+  rename(`All deaths`=all_deaths,
+         `Excess deaths`=excess_deaths,
+         `Covid-19 deaths`=covid19.nchs,
+         `Covid-19 % of excess` = percent_covid_in_excess,
+         `Excess deaths minus covid-19`=excess_minus)
+
+other_states <- march %>% 
+  filter(flag23!="Higher than baseline range" | flag24!="Higher than baseline range")
+other_states$percent_covid_in_excess <- ifelse(other_states$percent_covid_in_excess > 100, NA, other_states$percent_covid_in_excess)
+other_states$percent_covid_in_excess <- ifelse(other_states$percent_covid_in_excess == 0, NA, other_states$percent_covid_in_excess)
+other_states$excess_minus_covid <- ifelse(other_states$excess_minus_covid<0, NA, other_states$excess_minus_covid)
+
+other_states <- other_states %>%   
+  select(Place=state, `All deaths`=all_cause_deaths,
+         `Excess deaths`=excess_deaths, `Covid-19 deaths`=covid_deaths,
+         `Covid-19 % of excess`=percent_covid_in_excess, `Week 23`=flag23, `Week 24`=flag24) 
+```
+
+There were around 135,500 excess deaths between March and mid June, about 34 percent more than were publicly attributed to covid-19 at the time.
+
+This updated model adjusts not just for seasonality, population, flu, but also accounts for delay in reporting from individual states. 
+
+More recent data suggests that the gap between unattributed and attributed covid-19 deaths is shrinking. 
+
+## Deaths through June 13, 2020
+
+```{r ustable}
+kable(nice_table %>% filter(Place=="U.S."))
+```
+
+
+## States 
+
+```{r state_charts_major, warning=F, message=F, fig.height=16, fig.width=9}
+states %>% 
+  filter(year==2020) %>% 
+  filter(week %in% weeks_in) %>% 
+  ggplot(aes(week_end_date,all_cause_deaths)) +
+  geom_ribbon(aes(ymin=baseline_all_cause_lower, ymax=baseline_all_cause_upper), fill="gray70", alpha=.5) +
+  geom_ribbon(aes(ymin=baseline_all_cause, ymax=all_cause_deaths), fill="sienna1", alpha=.5) +
+  geom_ribbon(aes(ymin=all_cause_deaths-covid19.nchs, ymax=all_cause_deaths), fill="tomato", alpha=.5) +
+  geom_line(aes(x=week_end_date, y=all_cause_deaths),color="sienna1", alpha=.4) +
+  geom_line(color="black", size=.5) +
+  facet_wrap(~state, scales="free_y", ncol=5) +
+  theme_minimal()#, 
+       #subtitle="Exceeds the expected range and with the least delays in reporting")
+
+```
+
+```{r state_table}
+
+
+march$percent_covid_in_excess <- ifelse(march$percent_covid_in_excess > 100, NA, march$percent_covid_in_excess)
+march$percent_covid_in_excess <- ifelse(march$percent_covid_in_excess == 0, NA, march$percent_covid_in_excess)
+march$excess_minus_covid <- ifelse(march$excess_minus_covid<0, NA, march$excess_minus_covid)
+
+march <- march %>%   
+  mutate(lag=case_when(
+    quantile_rank==1 ~ "Significant reporting lag",
+    quantile_rank==2 ~ "Some reporting lag",
+    quantile_rank==3 ~ "Least reporting lag"
+  )) %>% 
+  select(Place=state, `All deaths`=all_cause_deaths,
+         `Excess deaths`=excess_deaths, `Covid-19 deaths`=covid_deaths,
+#         `Covid-19 % of excess`=percent_covid_in_excess, `Week 23`=flag23, `Week 24`=flag24, lag, order=restriction_type) 
+         `Covid-19 % of excess`=percent_covid_in_excess, `Week 23`=flag23, `Week 24`=flag24, lag) 
+
+kable(march %>% arrange(`Covid-19 % of excess`))
+```
+
+```{r export, warning=F, message=F}
+
+states <- states %>% 
+  filter(year==2020) %>% 
+  mutate(adjusted_expected=all_cause_deaths-baseline_all_cause,
+         adjusted_expected_minus_covid=adjusted_expected-covid19.nchs)
+
+state_lag_narrow <- state_lag_long %>% 
+  mutate(state=as.character(state)) %>% 
+  select(Place=state, lag_index=lag) %>% 
+  ungroup()
+
+march <- left_join(march, state_lag_narrow)
+
+write_csv(march, "data/outputs/states_summary_table.csv", na="")
+write_csv(national_weekly, "data/outputs/national_weekly_table.csv", na="")
+write_csv(states, "data/outputs/states_weekly_table.csv", na="")
+write_xlsx(list(`beautiful table`= nice_table,
+                `states summary table` = march,
+                `national weekly` = national_weekly,
+                `states weekly`=states), 
+           "data/outputs/beautiful_table.xlsx")
+
+
+```

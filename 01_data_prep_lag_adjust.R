@@ -23,8 +23,12 @@ week.pad <-sprintf("%02d", c(1:52))
 for(i in week.pad){
   
   for(j in c('2016-2017', '2017-2018', '2018-2019', '2019-2020')){
-  #j='2019-2020'
+  tryCatch({
     download.file(paste0('https://www.cdc.gov/flu/weekly/weeklyarchives', j,'/data/NCHSData',i,'.csv'),paste0('./data/provisional_pi/provisional', j,'_','week_',i,'.csv'))
+  },warning = function(error_message) {
+    message("No more data.")
+  })
+    break
   }
 }
 

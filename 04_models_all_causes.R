@@ -77,6 +77,7 @@ sum.excess.deaths.range.ac <-t(
 sum.excess.deaths.range.ac <- cbind.data.frame('state'=unique(analysis.data2$state), sum.excess.deaths.range.ac)
 res.ac <- format_excess_func(excess_ac_natl,'all_deaths')
 res.ac$state <- as.character(res.ac$state)
+
 # fix this error here
 #res.ac2 <- cd1 %>% 
 #  select(covid.death.hybrid, state, week_end) %>% 
