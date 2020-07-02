@@ -9,12 +9,10 @@ library(janitor)
 
 week_max <- 23
 
-weeks_df <- read_csv("check/weeks.csv")
-#weeks_df <- weeks %>% 
+weeks_df <- read_csv("specific_causes/weeks.csv")
 weeks_df <- weeks_df %>% 
   mutate(start_date=dmy(start_date)-1,
-         end_date=dmy(end_date)-1) #%>% 
-#  mutate(end_date=as.character(end_date))
+         end_date=dmy(end_date)-1) 
 
 
 # importing cdc cause specific death data for 2014-2018, grabbing columns for cause, omitting flag columns. Full list here: https://dev.socrata.com/foundry/data.cdc.gov/3yf8-kanr
@@ -64,7 +62,7 @@ causes_1920 <- read_csv("https://data.cdc.gov/api/views/muzy-jte6/rows.csv?acces
          nephritis_nephrotic_syndrome=nephritis_nephrotic_syndrome_and_nephrosis_n00_n07_n17_n19_n25_n27,
          covid19_multiple_causes_of_death=covid_19_u071_multiple_cause_of_death,
          covid19_underlying_cause_of_death=covid_19_u071_underlying_cause_of_death) %>% 
-  mutate(weekendingdate=ymd(weekendingdate))
+  mutate(weekendingdate=mdy(weekendingdate))
 
 # append the 19-20 data to the older data
 causes_1420 <- bind_rows(causes_1920, causes_1418)
@@ -178,7 +176,7 @@ causes_join <- causes_join %>%
 causes_save1 <- causes_join %>% 
   mutate(type="diseases_of_heart_i00_i09")
 
-write_csv(causes_join, paste0("diseases_of_heart_i00_i09_", Sys.Date(), ".csv"))
+write_csv(causes_join, paste0("specific_causes/diseases_of_heart_i00_i09_", Sys.Date(), ".csv"))
 
 ## alzheimer_disease_g30
 causes_1a <- causes_1420_long %>% 
@@ -196,7 +194,7 @@ causes_join <- causes_join %>%
 causes_save2 <- causes_join %>% 
   mutate(type="alzheimer_disease_g30")
 
-write_csv(causes_join, paste0("alzheimer_disease_g30_", Sys.Date(), ".csv"))
+write_csv(causes_join, paste0("specific_causes/alzheimer_disease_g30_", Sys.Date(), ".csv"))
 
 
 ## cerebrovascular_diseases
@@ -216,7 +214,7 @@ causes_join <- causes_join %>%
 causes_save3 <- causes_join %>% 
   mutate(type="cerebrovascular_diseases")
 
-write_csv(causes_join, paste0("cerebrovascular_diseases_", Sys.Date(), ".csv"))
+write_csv(causes_join, paste0("specific_causes/cerebrovascular_diseases_", Sys.Date(), ".csv"))
 
 
 ## chronic_lower_respiratory
@@ -235,7 +233,7 @@ causes_join <- causes_join %>%
 causes_save4 <- causes_join %>% 
   mutate(type="chronic_lower_respiratory")
 
-write_csv(causes_join, paste0("chronic_lower_respiratory_", Sys.Date(), ".csv"))
+write_csv(causes_join, paste0("specific_causes/chronic_lower_respiratory_", Sys.Date(), ".csv"))
 
 
 ## covid19_multiple_causes_of_death
@@ -255,7 +253,7 @@ causes_join <- causes_join %>%
 causes_save5 <- causes_join %>% 
   mutate(type="covid19_multiple_causes_of_death")
 
-write_csv(causes_join, paste0("covid19_multiple_causes_of_death_", Sys.Date(), ".csv"))
+write_csv(causes_join, paste0("specific_causes/covid19_multiple_causes_of_death_", Sys.Date(), ".csv"))
 
 ## covid19_underlying_cause_of_death
 
@@ -274,7 +272,7 @@ causes_join <- causes_join %>%
 causes_save6 <- causes_join %>% 
   mutate(type="covid19_underlying_cause_of_death")
 
-write_csv(causes_join, paste0("covid19_underlying_cause_of_death_", Sys.Date(), ".csv"))
+write_csv(causes_join, paste0("specific_causes/covid19_underlying_cause_of_death_", Sys.Date(), ".csv"))
 
 ## diabetes_mellitus_e10_e14
 
@@ -293,7 +291,7 @@ causes_join <- causes_join %>%
 causes_save7 <- causes_join %>% 
   mutate(type="diabetes_mellitus_e10_e14")
 
-write_csv(causes_join, paste0("diabetes_mellitus_e10_e14_", Sys.Date(), ".csv"))
+write_csv(causes_join, paste0("specific_causes/diabetes_mellitus_e10_e14_", Sys.Date(), ".csv"))
 
 
 ## influenza_and_pneumonia_j10
@@ -313,7 +311,7 @@ causes_join <- causes_join %>%
 causes_save8 <- causes_join %>% 
   mutate(type="influenza_and_pneumonia_j10")
 
-write_csv(causes_join, paste0("influenza_and_pneumonia_j10_", Sys.Date(), ".csv"))
+write_csv(causes_join, paste0("specific_causes/influenza_and_pneumonia_j10_", Sys.Date(), ".csv"))
 
 ## malignant_neoplasms_c00_c97 
 
@@ -332,7 +330,7 @@ causes_join <- causes_join %>%
 causes_save9 <- causes_join %>% 
   mutate(type="malignant_neoplasms_c00_c97")
 
-write_csv(causes_join, paste0("malignant_neoplasms_c00_c97_", Sys.Date(), ".csv"))
+write_csv(causes_join, paste0("specific_causes/malignant_neoplasms_c00_c97_", Sys.Date(), ".csv"))
 
 ## nephritis_nephrotic_syndrome
 
@@ -351,7 +349,7 @@ causes_join <- causes_join %>%
 causes_save10 <- causes_join %>% 
   mutate(type="nephritis_nephrotic_syndrome")
 
-write_csv(causes_join, paste0("nephritis_nephrotic_syndrome_", Sys.Date(), ".csv"))
+write_csv(causes_join, paste0("specific_causes/nephritis_nephrotic_syndrome_", Sys.Date(), ".csv"))
 
 ## other_diseases_of_respiratory
 
@@ -370,7 +368,7 @@ causes_join <- causes_join %>%
 causes_save11 <- causes_join %>% 
   mutate(type="other_diseases_of_respiratory")
 
-write_csv(causes_join, paste0("other_diseases_of_respiratory_", Sys.Date(), ".csv"))
+write_csv(causes_join, paste0("specific_causes/other_diseases_of_respiratory_", Sys.Date(), ".csv"))
 
 ## septicemia_a40_a41
 
@@ -389,7 +387,7 @@ causes_join <- causes_join %>%
 causes_save12 <- causes_join %>% 
   mutate(type="septicemia_a40_a41")
 
-write_csv(causes_join, paste0("septicemia_a40_a41_", Sys.Date(), ".csv"))
+write_csv(causes_join, paste0("specific_causes/septicemia_a40_a41_", Sys.Date(), ".csv"))
 
 ## symptoms_signs_and_abnormal
 
@@ -409,7 +407,7 @@ causes_join <- causes_join %>%
 causes_save13 <- causes_join %>% 
   mutate(type="symptoms_signs_and_abnormal")
 
-write_csv(causes_join, paste0("symptoms_signs_and_abnormal_", Sys.Date(), ".csv"))
+write_csv(causes_join, paste0("specific_causes/symptoms_signs_and_abnormal_", Sys.Date(), ".csv"))
 
 
 causes_long <- rbind(causes_save1, causes_save2, causes_save3, causes_save4,
@@ -417,285 +415,6 @@ causes_long <- rbind(causes_save1, causes_save2, causes_save3, causes_save4,
                      causes_save9, causes_save10, causes_save11, 
                      causes_save12, causes_save13)
 
-write_csv(causes_long, paste0("causes_long_", Sys.Date(), ".csv"))
-
-
-## US ----
-
-
-
-causes_1420_long <- causes_us_1420 %>%
-  #  filter(weekendingdate != '2020-05-09',
-  #         weekendingdate != '2020-05-02',
-  #         weekendingdate != '2020-04-25') %>% #,
-  #weekendingdate != '2020-04-18')
-  mutate(covid19_multiple_causes_of_death=as.numeric(covid19_multiple_causes_of_death),
-         covid19_underlying_cause_of_death=as.numeric(covid19_underlying_cause_of_death)) %>% 
-  ungroup() %>% 
-  pivot_longer(cols=5:ncol(causes_1420),
-               names_to="type",
-               values_to="count") %>% 
-  mutate(weekendingdate=ymd(weekendingdate)) %>% 
-  #left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  filter(WEEK <= week_max)
-
-#### slice out cases ---
-
-## diseases_of_heart
-causes_1a <- causes_1420_long %>% 
-  filter(type=="diseases_of_heart_i00_i09") %>% 
-  select(week_end=weekendingdate, count, WEEK, SEASON)
-
-causes_1b <- causes_us_1420 %>% 
-  left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  select(week_end=weekendingdate, count=diseases_of_heart_i00_i09, WEEK, SEASON)
-
-causes_join <- rbind(causes_1a, causes_1b)
-causes_join$one <- 1
-causes_join <- causes_join %>% 
-  filter(!is.na(count))
-
-causes_save1 <- causes_join %>% 
-  mutate(type="diseases_of_heart_i00_i09")
-
-write_csv(causes_join, paste0("us_diseases_of_heart_i00_i09_", Sys.Date(), ".csv"))
-
-## alzheimer_disease_g30
-causes_1a <- causes_1420_long %>% 
-  filter(type=="alzheimer_disease_g30") %>% 
-  select(week_end=weekendingdate, count, WEEK, SEASON)
-causes_1b <- causes_us_1420 %>% 
-  left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  select(week_end=weekendingdate, count=alzheimer_disease_g30, WEEK, SEASON)
-causes_join <- rbind(causes_1a, causes_1b)
-causes_join$one <- 1
-causes_join <- causes_join %>% 
-  filter(!is.na(count))
-
-causes_save2 <- causes_join %>% 
-  mutate(type="alzheimer_disease_g30")
-
-write_csv(causes_join, paste0("us_alzheimer_disease_g30_", Sys.Date(), ".csv"))
-
-
-## cerebrovascular_diseases
-causes_1a <- causes_1420_long %>% 
-  filter(type=="cerebrovascular_diseases") %>% 
-  select(week_end=weekendingdate, count, WEEK, SEASON)
-causes_1b <- causes_us_1420 %>% 
-  left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  select(week_end=weekendingdate, count=cerebrovascular_diseases, WEEK, SEASON)
-causes_join <- rbind(causes_1a, causes_1b)
-causes_join$one <- 1
-causes_join <- causes_join %>% 
-  filter(!is.na(count))
-
-
-causes_save3 <- causes_join %>% 
-  mutate(type="cerebrovascular_diseases")
-
-write_csv(causes_join, paste0("us_cerebrovascular_diseases_", Sys.Date(), ".csv"))
-
-
-## chronic_lower_respiratory
-causes_1a <- causes_1420_long %>% 
-  filter(type=="chronic_lower_respiratory") %>% 
-  select(week_end=weekendingdate, count, WEEK, SEASON)
-causes_1b <- causes_us_1420 %>% 
-  left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  select(state, week_end=weekendingdate, count=chronic_lower_respiratory, WEEK, SEASON)
-causes_join <- rbind(causes_1a, causes_1b)
-causes_join$one <- 1
-causes_join$state <- as.character(causes_join$state)
-causes_join <- causes_join %>% 
-  filter(!is.na(count))
-
-causes_save4 <- causes_join %>% 
-  mutate(type="chronic_lower_respiratory")
-
-write_csv(causes_join, paste0("chronic_lower_respiratory_", Sys.Date(), ".csv"))
-
-
-## covid19_multiple_causes_of_death
-
-causes_1a <- causes_1420_long %>% 
-  filter(type=="covid19_multiple_causes_of_death") %>% 
-  select(state=state.abb, week_end=weekendingdate, count, WEEK, SEASON)
-causes_1b <- causes_us_1420 %>% 
-  left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  select(state, week_end=weekendingdate, count=covid19_multiple_causes_of_death, WEEK, SEASON)
-causes_join <- rbind(causes_1a, causes_1b)
-causes_join$one <- 1
-causes_join$state <- as.character(causes_join$state)
-causes_join <- causes_join %>% 
-  filter(!is.na(count))
-
-causes_save5 <- causes_join %>% 
-  mutate(type="covid19_multiple_causes_of_death")
-
-write_csv(causes_join, paste0("covid19_multiple_causes_of_death_", Sys.Date(), ".csv"))
-
-## covid19_underlying_cause_of_death
-
-causes_1a <- causes_1420_long %>% 
-  filter(type=="covid19_underlying_cause_of_death") %>% 
-  select(state=state.abb, week_end=weekendingdate, count, WEEK, SEASON)
-causes_1b <- causes_us_1420 %>% 
-  left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  select(state, week_end=weekendingdate, count=covid19_underlying_cause_of_death, WEEK, SEASON)
-causes_join <- rbind(causes_1a, causes_1b)
-causes_join$one <- 1
-causes_join$state <- as.character(causes_join$state)
-causes_join <- causes_join %>% 
-  filter(!is.na(count))
-
-causes_save6 <- causes_join %>% 
-  mutate(type="covid19_underlying_cause_of_death")
-
-write_csv(causes_join, paste0("covid19_underlying_cause_of_death_", Sys.Date(), ".csv"))
-
-## diabetes_mellitus_e10_e14
-
-causes_1a <- causes_1420_long %>% 
-  filter(type=="diabetes_mellitus_e10_e14") %>% 
-  select(state=state.abb, week_end=weekendingdate, count, WEEK, SEASON)
-causes_1b <- causes_us_1420 %>% 
-  left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  select(state, week_end=weekendingdate, count=diabetes_mellitus_e10_e14, WEEK, SEASON)
-causes_join <- rbind(causes_1a, causes_1b)
-causes_join$one <- 1
-causes_join$state <- as.character(causes_join$state)
-causes_join <- causes_join %>% 
-  filter(!is.na(count))
-
-causes_save7 <- causes_join %>% 
-  mutate(type="diabetes_mellitus_e10_e14")
-
-write_csv(causes_join, paste0("diabetes_mellitus_e10_e14_", Sys.Date(), ".csv"))
-
-
-## influenza_and_pneumonia_j10
-
-causes_1a <- causes_1420_long %>% 
-  filter(type=="influenza_and_pneumonia_j10") %>% 
-  select(state=state.abb, week_end=weekendingdate, count, WEEK, SEASON)
-causes_1b <- causes_us_1420 %>% 
-  left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  select(state, week_end=weekendingdate, count=influenza_and_pneumonia_j10, WEEK, SEASON)
-causes_join <- rbind(causes_1a, causes_1b)
-causes_join$one <- 1
-causes_join$state <- as.character(causes_join$state)
-causes_join <- causes_join %>% 
-  filter(!is.na(count))
-
-causes_save8 <- causes_join %>% 
-  mutate(type="influenza_and_pneumonia_j10")
-
-write_csv(causes_join, paste0("influenza_and_pneumonia_j10_", Sys.Date(), ".csv"))
-
-## malignant_neoplasms_c00_c97 
-
-causes_1a <- causes_1420_long %>% 
-  filter(type=="malignant_neoplasms_c00_c97") %>% 
-  select(state=state.abb, week_end=weekendingdate, count, WEEK, SEASON)
-causes_1b <- causes_us_1420 %>% 
-  left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  select(state, week_end=weekendingdate, count=malignant_neoplasms_c00_c97, WEEK, SEASON)
-causes_join <- rbind(causes_1a, causes_1b)
-causes_join$one <- 1
-causes_join$state <- as.character(causes_join$state)
-causes_join <- causes_join %>% 
-  filter(!is.na(count))
-
-causes_save9 <- causes_join %>% 
-  mutate(type="malignant_neoplasms_c00_c97")
-
-write_csv(causes_join, paste0("malignant_neoplasms_c00_c97_", Sys.Date(), ".csv"))
-
-## nephritis_nephrotic_syndrome
-
-causes_1a <- causes_1420_long %>% 
-  filter(type=="nephritis_nephrotic_syndrome") %>% 
-  select(state=state.abb, week_end=weekendingdate, count, WEEK, SEASON)
-causes_1b <- causes_us_1420 %>% 
-  left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  select(state, week_end=weekendingdate, count=nephritis_nephrotic_syndrome, WEEK, SEASON)
-causes_join <- rbind(causes_1a, causes_1b)
-causes_join$one <- 1
-causes_join$state <- as.character(causes_join$state)
-causes_join <- causes_join %>% 
-  filter(!is.na(count))
-
-causes_save10 <- causes_join %>% 
-  mutate(type="nephritis_nephrotic_syndrome")
-
-write_csv(causes_join, paste0("nephritis_nephrotic_syndrome_", Sys.Date(), ".csv"))
-
-## other_diseases_of_respiratory
-
-causes_1a <- causes_1420_long %>% 
-  filter(type=="other_diseases_of_respiratory") %>% 
-  select(state=state.abb, week_end=weekendingdate, count, WEEK, SEASON)
-causes_1b <- causes_us_1420 %>% 
-  left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  select(state, week_end=weekendingdate, count=other_diseases_of_respiratory, WEEK, SEASON)
-causes_join <- rbind(causes_1a, causes_1b)
-causes_join$one <- 1
-causes_join$state <- as.character(causes_join$state)
-causes_join <- causes_join %>% 
-  filter(!is.na(count))
-
-causes_save11 <- causes_join %>% 
-  mutate(type="other_diseases_of_respiratory")
-
-write_csv(causes_join, paste0("other_diseases_of_respiratory_", Sys.Date(), ".csv"))
-
-## septicemia_a40_a41
-
-causes_1a <- causes_1420_long %>% 
-  filter(type=="septicemia_a40_a41") %>% 
-  select(state=state.abb, week_end=weekendingdate, count, WEEK, SEASON)
-causes_1b <- causes_us_1420 %>% 
-  left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  select(state, week_end=weekendingdate, count=septicemia_a40_a41, WEEK, SEASON)
-causes_join <- rbind(causes_1a, causes_1b)
-causes_join$one <- 1
-causes_join$state <- as.character(causes_join$state)
-causes_join <- causes_join %>% 
-  filter(!is.na(count))
-
-causes_save12 <- causes_join %>% 
-  mutate(type="septicemia_a40_a41")
-
-write_csv(causes_join, paste0("septicemia_a40_a41_", Sys.Date(), ".csv"))
-
-## symptoms_signs_and_abnormal
-
-causes_1a <- causes_1420_long %>% 
-  filter(type=="symptoms_signs_and_abnormal1") %>% 
-  select(state=state.abb, week_end=weekendingdate, count, WEEK, SEASON)
-causes_1b <- causes_us_1420 %>% 
-  left_join(weeks_df, by=c("weekendingdate"="end_date")) %>% 
-  select(state, week_end=weekendingdate, count=symptoms_signs_and_abnormal, WEEK, SEASON)
-causes_join <- rbind(causes_1a, causes_1b)
-#causes_join$one <- 1
-causes_join$one <- .5
-causes_join$state <- as.character(causes_join$state)
-causes_join <- causes_join %>% 
-  filter(!is.na(count))
-
-causes_save13 <- causes_join %>% 
-  mutate(type="symptoms_signs_and_abnormal")
-
-write_csv(causes_join, paste0("symptoms_signs_and_abnormal_", Sys.Date(), ".csv"))
-
-
-causes_long <- rbind(causes_save1, causes_save2, causes_save3, causes_save4,
-                     causes_save5, causes_save6, causes_save7, causes_save8,
-                     causes_save9, causes_save10, causes_save11, 
-                     causes_save12, causes_save13)
-
-write_csv(causes_long, paste0("causes_long_", Sys.Date(), ".csv"))
+write_csv(causes_long, paste0("specific_causes/causes_long_", Sys.Date(), ".csv"))
 
           

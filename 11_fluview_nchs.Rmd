@@ -1,0 +1,89 @@
+---
+title: "Fluview vs NCHS All Deaths"
+author: "Andrew Ba Tran"
+date: "7/1/2020"
+output: html_document
+---
+```{r setup, warning=F, message=F}
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(knitr)
+```
+
+# State gap
+
+```{r load_data, warning=F, message=F}
+cdc1 <- read_csv("https://data.cdc.gov/api/views/r8kw-7aab/rows.csv?accessType=DOWNLOAD")
+cdc1 <- clean_names(cdc1) %>% 
+  mutate(end_week=mdy(end_week)) %>% 
+  group_by(state) %>%
+  arrange(end_week) %>% 
+  mutate(week=row_number()+4)
+
+fluview <- read_csv("data/weekly_fluview/State_Custom_data25.csv")
+
+fluview <- clean_names(fluview) %>% 
+  filter(season=="2019-20") %>% 
+  select(week, state=sub_area, total_deaths2=total_deaths) %>% 
+  mutate(total_deaths2=gsub(",", "", total_deaths2)) %>% 
+  mutate(total_deaths2=as.numeric(total_deaths2))
+
+cdc3 <- left_join(cdc1, fluview)
+
+us1 <- cdc3 %>% 
+    filter(week<=23) %>% 
+
+  mutate(check_all=case_when(
+    total_deaths >  total_deaths2 ~ "More",
+    total_deaths  ==  total_deaths2 ~ "Equal",
+    total_deaths  <  total_deaths2 ~ "Less"
+  )) %>% 
+  select(start_week, end_week, state, nchs=total_deaths, 
+         fluview=total_deaths2) %>% 
+  filter(state!="United States") %>% 
+  filter(state!="Puerto Rico") %>% 
+  pivot_longer(cols=4:5, names_to="type", values_to="deaths")
+```
+
+```{r chart1, warning=F, message=F, fig.height=12, fig.width=9}
+ggplot(us1, aes(x=end_week, y=deaths, color=type)) +
+  geom_line() +
+  facet_wrap(~state, ncol=4, scales="free_y")
+```
+
+```{r summary, warning=F, message=F}
+gap_state <- cdc3 %>% 
+      filter(week<=23) %>% 
+
+  group_by(state) %>% 
+  summarize(nchs=sum(total_deaths, na.rm=T),
+            fluview=sum(total_deaths2, na.rm=T)) %>% 
+    filter(fluview!=0) %>% 
+  mutate(difference=nchs-fluview)
+kable(gap_state, format.args = list(big.mark = ","))
+```
+
+## United States
+
+```{r combined, warning=F, message=F}
+gap_state_summary <-
+  gap_state %>% 
+  summarize(nchs=sum(nchs),
+            fluview=sum(fluview))
+
+kable(gap_state_summary, format.args = list(big.mark = ","))
+```
+
+Presumably, NCHS and Fluview data should even out, right? 
+
+The NCHS data counts people who died in the state regardless of residence.
+
+The Fluview data counts people who died but were residents. 
+
+So what happens to those who weren't residents? They're added to the Fluview data to their states of origin?
+
+So why is there a gap of `r prettyNum(gap_state_summary$nchs - gap_state_summary$fluview, big.mark=",")` deaths? 
+
+Who has fallen between the gaps? Are these undocumented? Internationals?
+
