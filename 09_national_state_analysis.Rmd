@@ -1,7 +1,7 @@
 ---
 title: "National and state excess deaths analysis"
 author: "Andrew Ba Tran"
-date: "6/30/2020"
+date: "7/09/2020"
 output:
   html_document:
     code_folding: hide
@@ -24,7 +24,7 @@ library(writexl)
 library(knitr)
 library(MMWRweek)
 
-nat <- read_csv("data/outputs/national_and_state_summary.csv") %>% 
+nat <- read_csv("data/outputs/national_and_state_summary_070320.csv") %>% 
   filter(state=="US.agg") %>% 
   rename(covid19.nchs=covid.death.hybrid)
 
@@ -36,8 +36,8 @@ nat$week <- dates$MMWRweek
 ```
 
 ```{r national_weekly_chart, warning=F, message=F, fig.width=9, fig.height=4}
-weeks_in <- 1:24
-weeks_march <- 10:24
+weeks_in <- 1:25
+weeks_march <- 10:25
 
 natlsum_ad <- nat %>%
   filter(year==2020) %>% 
@@ -81,7 +81,7 @@ state_lag_long <- state_lag %>%
   select(-state) %>% 
   rename(state=state.abb)
 
-states <- read_csv("data/outputs/national_and_state_summary.csv") %>% 
+states <- read_csv("data/outputs/national_and_state_summary_070320.csv") %>% 
   filter(state!="US" & state!="US.agg") %>% 
   rename(covid19.nchs=covid.death.hybrid) %>% 
   ungroup() %>% 
@@ -99,16 +99,6 @@ states$restriction_type = ifelse(states$state=="NYC", "major", states$restrictio
 ```
 
 ```{r week15, warning=F, message=F}
-states_23 <- states %>% 
-  filter(year==2020) %>% 
-  filter(week==23) %>% 
-  mutate(flag = case_when(
-    all_cause_deaths < baseline_all_cause_lower ~ "Lower than baseline range",
-    all_cause_deaths > baseline_all_cause_upper ~ "Higher than baseline range",
-    TRUE ~ "Within range"
-  )) %>% 
-  select(state, flag23=flag)
-
 states_24 <- states %>% 
   filter(year==2020) %>% 
   filter(week==24) %>% 
@@ -118,6 +108,16 @@ states_24 <- states %>%
     TRUE ~ "Within range"
   )) %>% 
   select(state, flag24=flag)
+
+states_25 <- states %>% 
+  filter(year==2020) %>% 
+  filter(week==25) %>% 
+  mutate(flag = case_when(
+    all_cause_deaths < baseline_all_cause_lower ~ "Lower than baseline range",
+    all_cause_deaths > baseline_all_cause_upper ~ "Higher than baseline range",
+    TRUE ~ "Within range"
+  )) %>% 
+  select(state, flag25=flag)
 ```
 
 ```{r beautiful_states, warning=F, message=F}
@@ -134,8 +134,8 @@ march <- states %>%
             ) %>% 
   mutate(percent_covid_in_excess=round(covid_deaths/excess_deaths*100)) %>% 
   ungroup() %>% 
-  left_join(states_23) %>% 
-  left_join(states_24) 
+  left_join(states_24) %>% 
+  left_join(states_25) 
 
 
 march$percent_covid_in_excess <- ifelse(march$percent_covid_in_excess >100, NA, march$percent_covid_in_excess)
@@ -200,7 +200,7 @@ nat_solo <- national_weekly %>%
 
 flagged_states <- march %>% 
 # change flag here maybe
-    filter(flag23=="Higher than baseline range" & flag24=="Higher than baseline range") %>% 
+    filter(flag24=="Higher than baseline range" & flag25=="Higher than baseline range") %>% 
   filter(excess_deaths >0) %>% 
   filter(x_excess_covid >1) %>% 
   select(Place=state, all_deaths=all_cause_deaths,
@@ -216,7 +216,7 @@ nice_table <- rbind(nat_solo, flagged_states) %>%
          `Excess deaths minus covid-19`=excess_minus)
 
 other_states <- march %>% 
-  filter(flag23!="Higher than baseline range" | flag24!="Higher than baseline range")
+  filter(flag24!="Higher than baseline range" | flag25!="Higher than baseline range")
 other_states$percent_covid_in_excess <- ifelse(other_states$percent_covid_in_excess > 100, NA, other_states$percent_covid_in_excess)
 other_states$percent_covid_in_excess <- ifelse(other_states$percent_covid_in_excess == 0, NA, other_states$percent_covid_in_excess)
 other_states$excess_minus_covid <- ifelse(other_states$excess_minus_covid<0, NA, other_states$excess_minus_covid)
@@ -224,16 +224,16 @@ other_states$excess_minus_covid <- ifelse(other_states$excess_minus_covid<0, NA,
 other_states <- other_states %>%   
   select(Place=state, `All deaths`=all_cause_deaths,
          `Excess deaths`=excess_deaths, `Covid-19 deaths`=covid_deaths,
-         `Covid-19 % of excess`=percent_covid_in_excess, `Week 23`=flag23, `Week 24`=flag24) 
+         `Covid-19 % of excess`=percent_covid_in_excess, `Week 24`=flag24, `Week 25`=flag25) 
 ```
 
-There were around 135,500 excess deaths between March and mid June, about 34 percent more than were publicly attributed to covid-19 at the time.
+There were around 138,000 excess deaths between March and June, about 22 percent more than were publicly attributed to covid-19 at the time.
 
 This updated model adjusts not just for seasonality, population, flu, but also accounts for delay in reporting from individual states. 
 
-More recent data suggests that the gap between unattributed and attributed covid-19 deaths is shrinking. 
+More recent data suggests that the gap between unattributed and attributed covid-19 deaths is shrinking. But growing in some states, like Arizona.
 
-## Deaths through June 13, 2020
+## Deaths through June 26, 2020
 
 ```{r ustable}
 kable(nice_table %>% filter(Place=="U.S."))
@@ -252,7 +252,7 @@ states %>%
   geom_ribbon(aes(ymin=all_cause_deaths-covid19.nchs, ymax=all_cause_deaths), fill="tomato", alpha=.5) +
   geom_line(aes(x=week_end_date, y=all_cause_deaths),color="sienna1", alpha=.4) +
   geom_line(color="black", size=.5) +
-  facet_wrap(~state, scales="free_y", ncol=5) +
+  facet_wrap(~state, scales="free", ncol=5) +
   theme_minimal()#, 
        #subtitle="Exceeds the expected range and with the least delays in reporting")
 
@@ -274,7 +274,7 @@ march <- march %>%
   select(Place=state, `All deaths`=all_cause_deaths,
          `Excess deaths`=excess_deaths, `Covid-19 deaths`=covid_deaths,
 #         `Covid-19 % of excess`=percent_covid_in_excess, `Week 23`=flag23, `Week 24`=flag24, lag, order=restriction_type) 
-         `Covid-19 % of excess`=percent_covid_in_excess, `Week 23`=flag23, `Week 24`=flag24, lag) 
+         `Covid-19 % of excess`=percent_covid_in_excess, `Week 24`=flag24, `Week 25`=flag25, lag) 
 
 kable(march %>% arrange(`Covid-19 % of excess`))
 ```
