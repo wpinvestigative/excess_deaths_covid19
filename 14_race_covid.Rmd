@@ -1,0 +1,182 @@
+---
+title: "National and state covid deaths analysis by race"
+author: "Andrew Ba Tran"
+date: "7/30/2020"
+output:
+  html_document:
+    code_folding: hide
+---
+
+
+```{r prep, warning=F, message=F, fig.width=9, fig.height=3.5}
+
+packages <- c("tidyverse", "lubridate", "writexl", "knitr",
+              "MMWRweek")
+
+if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packages, rownames(installed.packages())), repos = "http://cran.us.r-project.org")  
+}
+
+options(knitr.kable.NA = '')
+
+library(tidyverse)
+library(lubridate)
+library(writexl)
+library(knitr)
+library(MMWRweek)
+library(janitor)
+library(DT)
+
+updated_file <- "race_groups_073020.csv"
+
+
+race <- read.csv("https://data.cdc.gov/api/views/qfhf-uhaa/rows.csv?accessType=DOWNLOAD")
+  #race2 <- read_csv("https://data.cdc.gov/api/views/vsak-wrfu/rows.csv?accessType=DOWNLOAD")
+  #race2 <- clean_names(race2)
+race <- clean_names(race)
+race <- race %>% 
+  filter(outcome=="COVID-19") %>% 
+  filter(!is.na(number_of_deaths)) %>% 
+  select(jurisdiction, week_ending_date, state_abbreviation, mmwr_year, mmwr_week,
+         race_ethnicity, time_period, covid_deaths=number_of_deaths)
+
+covid_race <- race %>% 
+  filter(state_abbreviation=="US") %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week<29) %>% 
+  mutate(week_ending_date=mdy(week_ending_date)) %>% 
+  rename(state=state_abbreviation)
+#state
+#covid_race <- read_csv("https://data.cdc.gov/api/views/9bhg-hcku/rows.csv?accessType=DOWNLOAD")
+#us
+
+
+nat <- read_csv(updated_file) %>% 
+  filter(state=="US") %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week<29) %>% 
+  mutate(type=str_trim(type)) %>% 
+  rename(race_ethnicity=type)
+
+nat <- nat %>% full_join(covid_race) %>% 
+  mutate(race_ethnicity=gsub("Non-Hispanic ", "", race_ethnicity)) %>% 
+  filter(race_ethnicity!="Other")
+
+nat_summary <- nat %>% 
+  filter(week_start > ymd("2020-02-29")) %>% 
+  group_by(race_ethnicity) %>% 
+  summarize(expected=sum(pred, na.rm=T),
+            all_deaths=sum(obs, na.rm=T),
+            #all_deaths_alt=sum(total_deaths_alt),
+            covid_19_deaths=sum(covid_deaths, na.rm=T)) %>% 
+  mutate(excess=all_deaths-expected,
+         percent=round(covid_19_deaths/excess*100,2),
+         excess_minus=excess-covid_19_deaths) %>% 
+  rename(Race=race_ethnicity, `All deaths`=all_deaths,
+         `Excess deaths`=excess,
+         `Covid-19 deaths`=covid_19_deaths,
+         `Covid-19 % of excess`=percent,
+         `Excess deaths minus covid-19`=excess_minus) 
+
+nat %>%  ggplot(aes(week_end, obs)) +
+  geom_ribbon(aes(ymin=lpi, ymax=upi), fill="gray70", alpha=.5) +
+  geom_ribbon(aes(ymin=pred, ymax=obs), fill="sienna1", alpha=.5) +
+  geom_ribbon(aes(ymin=obs-covid_deaths, ymax=obs), fill="tomato", alpha=.5) +
+  geom_line(aes(x=week_end, y=obs),color="sienna1", alpha=.4) +
+  geom_line(color="black", size=.5) +
+  facet_wrap(~race_ethnicity, scales="free_y", ncol=3) +
+  theme_minimal()
+#covid_race <- race %>% 
+#  filter(state_abbreviation=="US") %>% 
+#  filter(mmwr_year==2020) %>% 
+  #filter(mmwr_week<27) %>% 
+#  mutate(week_ending_date=mdy(week_ending_date)) %>% 
+#  rename(state=state_abbreviation)  %>% 
+#  mutate(race_ethnicity=gsub("Non-Hispanic ", "", race_ethnicity))
+
+#covid_race_percent <- race %>% 
+#  filter(mmwr_year==2020) %>% 
+  #filter(mmwr_week<27) %>% 
+#  mutate(week_ending_date=mdy(week_ending_date)) %>% 
+#  rename(state=state_abbreviation)  %>% 
+#  mutate(race_ethnicity=gsub("Non-Hispanic ", "", race_ethnicity)) %>% 
+#  group_by(mmwr_week, state) %>% 
+#  mutate(percent=round(covid_deaths/sum(covid_deaths, na.rm=T)*100,2))
+
+#ggplot(covid_race_percent, aes(x=mmwr_week, y=percent, group=race_ethnicity, fill=race_ethnicity)) +
+#         geom_col() +
+#         facet_geo(~state) +
+#  theme_minimal()
+#state
+#covid_race <- read_csv("https://data.cdc.gov/api/views/9bhg-hcku/rows.csv?accessType=DOWNLOAD")
+#us
+
+
+
+#covid_race %>%  ggplot(aes(week_ending_date, covid_deaths)) +
+#  geom_line(color="sienna1", alpha=.4) +
+#  facet_wrap(~race_ethnicity, scales="free_y", ncol=3) +
+#  theme_minimal()
+```
+
+**Between March 1 and July 4 or 11**
+
+```{r table, warning=F, message=F}
+nat_summary %>% 
+  kable(format.args = list(big.mark = ","))
+
+```
+
+## States
+
+```{r states, warning=F, message=F, fig.width=9, fig.height=65}
+
+states <- read_csv(updated_file) %>% 
+  filter(state!="US") %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week<29) %>% 
+  mutate(state=case_when(
+    state=="YC" ~ "NYC",
+    TRUE ~ state
+  )) %>% 
+  rename(race_ethnicity=type)
+
+
+covid_race <- race %>% 
+  filter(state_abbreviation!="US") %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week<29) %>% 
+  mutate(week_ending_date=mdy(week_ending_date)) %>% 
+  rename(state=state_abbreviation)
+
+states_race <- full_join(states, covid_race) %>% 
+  mutate(race_ethnicity=gsub("Non-Hispanic ", "", race_ethnicity))
+
+states_race %>% ggplot(aes(week_end, obs)) +
+ geom_ribbon(aes(ymin=lpi, ymax=upi), fill="gray70", alpha=.5) +
+  geom_ribbon(aes(ymin=pred, ymax=obs), fill="sienna1", alpha=.5) +
+  geom_ribbon(aes(ymin=obs-covid_deaths, ymax=obs), fill="tomato", alpha=.5) +
+  geom_line(aes(x=week_end, y=obs),color="sienna1", alpha=.4) +
+  geom_line(color="black", size=.5) +
+  facet_grid(state~race_ethnicity, scales="free_y") +theme_minimal() 
+
+
+state_summary <- states_race %>% 
+  filter(week_start > ymd("2020-03-01")) %>% 
+  group_by(state, race_ethnicity) %>% 
+  summarize(expected=sum(pred, na.rm=T),
+            all_deaths=sum(obs, na.rm=T),
+            covid_19_deaths=sum(covid_deaths, na.rm=T)) %>% 
+  mutate(excess=all_deaths-expected,
+         percent=round(covid_19_deaths/excess*100,2),
+         excess_minus=excess-covid_19_deaths) %>% 
+  rename(State=state, Expected=expected,Race=race_ethnicity, `All deaths`=all_deaths,
+         `Excess deaths`=excess,
+         `Covid-19 deaths`=covid_19_deaths,
+         `Covid-19 % of excess`=percent,
+         `Excess deaths minus covid-19`=excess_minus)
+
+datatable(state_summary, filter = 'top')
+
+```
+

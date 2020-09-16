@@ -1,0 +1,138 @@
+---
+title: "Alzheimers: National and state"
+author: "Andrew Ba Tran"
+date: "8/07/2020"
+output:
+  html_document:
+    code_folding: hide
+---
+
+
+```{r prep, warning=F, message=F}
+
+packages <- c("tidyverse", "lubridate", "writexl", "knitr",
+              "MMWRweek", "DT")
+
+if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packages, rownames(installed.packages())), repos = "http://cran.us.r-project.org")  
+}
+
+options(knitr.kable.NA = '')
+
+library(tidyverse)
+library(lubridate)
+library(writexl)
+library(knitr)
+library(MMWRweek)
+library(DT)
+
+nat <- read_csv("alz.cause.summary.state.df_2020-08-20.csv") %>% 
+  filter(state=="US") %>% 
+  #mutate(week_end=mdy(week_end))
+  mutate(week_end=ymd(week_end))
+```
+
+```{r national_weekly_chart, warning=F, message=F, fig.width=9, fig.height=4}
+weeks_in <- 1:30
+weeks_march <- 10:30
+
+natlsum_ad <- nat %>%
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week %in% weeks_in)
+
+#national_weekly <- natlsum_ad %>% 
+#  select(week, week_end_date, year,
+#                     all_cause_deaths, expected_all_cause=baseline_all_cause,
+#                     expected_all_cause_upper=baseline_all_cause_upper, 
+#                     expected_all_cause_lower=baseline_all_cause_lower,
+#                     excess_all_cause_deaths, covid19.nchs)
+
+natlsum_ad %>% 
+  ggplot(aes(week_end,obs)) +
+  geom_ribbon(aes(ymin=lpi, ymax=upi), fill="gray70", alpha=.5) +
+  geom_ribbon(aes(ymin=pred, ymax=obs), fill="sienna1", alpha=.5) +
+  geom_line(data=natlsum_ad, aes(x=week_end, y=obs),color="sienna1", alpha=.4) +
+  geom_line(color="black", size=1) +
+  theme_minimal() +
+  labs(title="U.S. Alzheimer and dementia deaths", y="Weekly deaths", x="") 
+
+```
+
+```{r states, warning=F, message=F}
+states <- read_csv("alz.cause.summary.state.df_2020-08-07.csv") %>% 
+  filter(state!="US" ) %>% 
+  mutate(week_end=mdy(week_end))
+```
+
+```{r week15, warning=F, message=F}
+states_29 <- states %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week==29) %>% 
+  mutate(flag = case_when(
+    obs < lpi ~ "Lower than baseline range",
+    obs > upi ~ "Higher than baseline range",
+    TRUE ~ "Within range"
+  )) %>% 
+  select(state, flag29=flag)
+
+states_30 <- states %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week==30) %>% 
+  mutate(flag = case_when(
+    obs < lpi ~ "Lower than baseline range",
+    obs > upi ~ "Higher than baseline range",
+    TRUE ~ "Within range"
+  )) %>% 
+  select(state, flag30=flag)
+```
+
+```{r beautiful_states, warning=F, message=F}
+march <- states %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week %in% weeks_march) %>% 
+  group_by(state) %>%
+  summarize(deaths=sum(obs, na.rm=T),
+            expected=sum(pred, na.rm=T),
+            excess_deaths=sum(unexplained.cases, na.rm=T)) %>% 
+  mutate(x_excess=round((deaths-expected)/expected*100,2)) %>% 
+  ungroup() %>% 
+  left_join(states_29) %>% 
+  left_join(states_30) 
+
+
+higher <- march %>% 
+  filter(flag29=="Higher than baseline range") %>% 
+  pull(state)
+
+within <- march %>% 
+  filter(flag29=="Within range") %>% 
+  pull(state)
+
+lower <- march %>% 
+  filter(flag29=="Lower than baseline range") %>% 
+  pull(state)
+
+
+```
+
+## States 
+
+```{r state_charts_major, warning=F, message=F, fig.height=16, fig.width=9}
+states %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week %in% weeks_in) %>% 
+  ggplot(aes(week_end, obs)) +
+  geom_ribbon(aes(ymin=lpi, ymax=upi), fill="gray70", alpha=.5) +
+  geom_ribbon(aes(ymin=pred, ymax=obs), fill="sienna1", alpha=.5) +
+  geom_line(aes(x=week_end, y=obs),color="sienna1", alpha=.4) +
+  geom_line(color="black", size=.5) +
+  facet_wrap(~state, scales="free", ncol=5) +
+  theme_minimal()#, 
+       #subtitle="Exceeds the expected range and with the least delays in reporting")
+
+```
+
+```{r state_table}
+
+march %>% datatable()
+```

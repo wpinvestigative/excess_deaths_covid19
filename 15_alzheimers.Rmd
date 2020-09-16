@@ -1,0 +1,369 @@
+---
+title: "Alzheimers and other causes: National"
+author: "Andrew Ba Tran"
+date: "9/8/2020"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+---
+
+# Between March 1 and August 16
+
+Caveats: Selected causes of death are shown, based on analyses of the most prevalent comorbid conditions reported on death certificates where COVID-19 was listed as a cause of death (see https://www.cdc.gov/nchs/nvss/vsrr/covid_weekly/index.htm#Comorbidities). Cause of death counts are based on the underlying cause of death, and presented for Respiratory diseases, Circulatory diseases, Malignant neoplasms, and Alzheimer disease and dementia. Estimated numbers of deaths due to these other causes of death could represent misclassified COVID-19 deaths, or potentially could be indirectly related to COVID-19 (e.g., deaths from other causes occurring in the context of health care shortages or overburdened health care systems). Deaths with an underlying cause of death of COVID-19 are not included in these estimates of deaths due to other causes. Deaths due to external causes (i.e. injuries) or unknown causes are excluded.
+
+Data from the [CDC](https://data.cdc.gov/NCHS/Weekly-counts-of-death-by-jurisdiction-and-cause-o/u6jv-9ijr/): 
+
+```{r setup, warning=F, message=F}
+library(tidyverse)
+library(knitr)
+library(janitor)
+library(lubridate)
+
+# run 01_all_causes.R and 02_causes_modeling.R to generate the spreadsheet below
+
+todays_date <- as.character(Sys.Date())
+file_path <-  paste0("cause.summary.state.df_", todays_date, ".csv")
+causes <- read_csv(file_path)
+
+
+type_list <- unique(causes$type)
+
+states_list <- c("GA", "NYC", "FL", "NJ", "MI", "US")
+
+weeks_in <- 1:33
+weeks_march <- 10:33
+
+causes %>% 
+  group_by(state, type) %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(state=="US") %>% 
+  filter(mmwr_week %in% weeks_march) %>% 
+   rename(deaths=obs,
+         `excess deaths`=unexplained.cases,
+         expected=pred,
+         `expected upper range`=upi,
+         `expected lower range`=lpi
+  )   %>% 
+  summarize(
+          `expected deaths`=sum(expected),
+          `actual deaths`=sum(deaths),
+          `excess deaths`=sum(`excess deaths`)) %>% 
+  mutate(`percent diff`=round((`actual deaths`-`expected deaths`)/`expected deaths`*100,2)) %>% 
+  kable(format.args = list(big.mark = ","))
+```
+
+
+## Circulatory diseases
+
+```{r heart_failure, fig.width=8, fig.height=2.2, warning=F, message=F}
+df <- causes %>%
+    filter(type=="Circulatory diseases")
+
+mar <- df %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week %in% weeks_march) %>% 
+  mutate(excess_is=case_when(
+    obs < lpi ~ "Lower than range",
+    obs > upi ~ "Higher than range",
+    TRUE ~ "Within the range"
+  )) %>%
+  arrange(desc(unexplained.cases)) %>% 
+  rename(deaths=obs,
+         `excess deaths`=unexplained.cases,
+         expected=pred,
+         `expected upper range`=upi,
+         `expected lower range`=lpi
+  ) 
+
+mar_summary <- mar %>% 
+  filter(state %in% states_list) %>% 
+  group_by(state) %>% 
+  summarize(deaths=sum(deaths),
+          `excess deaths`=sum(`excess deaths`))
+
+## now for charting
+df_chart <-  df %>% 
+  filter(mmwr_year==2020) #%>% 
+ # filter(state!="US")
+
+df_chart %>% 
+  #filter(state %in% mar_counties) %>% 
+  filter(mmwr_week %in% weeks_in) %>% 
+  filter(state %in% states_list) %>% 
+  ggplot(aes(week_end, obs)) +
+  geom_ribbon(aes(ymin=lpi, ymax=upi), fill="gray70", alpha=.8) +
+  geom_line(color="firebrick", size=.5) +
+  facet_wrap(~state, ncol=5, scales="free_y") +
+  labs(title="State excess Circulatory diseases") +
+  theme_minimal()
+
+kable(mar_summary, format.args = list(big.mark = ","))
+mar_summary$type <- "Circulatory diseases"
+write_csv(mar_summary, "circ_disease.csv")
+```
+
+## Alzheimer disease and dementia
+
+```{r alzheimer_disease_g30, fig.width=8, fig.height=2.2, warning=F, message=F}
+df <- causes %>%
+    filter(type=="Alzheimer disease and dementia")
+
+mar <- df %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week %in% weeks_march) %>% 
+  mutate(excess_is=case_when(
+    obs < lpi ~ "Lower than range",
+    obs > upi ~ "Higher than range",
+    TRUE ~ "Within the range"
+  )) %>%
+  arrange(desc(unexplained.cases)) %>% 
+  rename(deaths=obs,
+         `excess deaths`=unexplained.cases,
+         expected=pred,
+         `expected upper range`=upi,
+         `expected lower range`=lpi
+  ) 
+
+mar_summary <- mar %>% 
+  filter(state %in% states_list) %>% 
+  group_by(state) %>% 
+  summarize(deaths=sum(deaths),
+          `excess deaths`=sum(`excess deaths`))
+
+#mar_states <- mar %>% 
+ # filter(excess_is=="Higher than range") %>% 
+#  pull(state)
+
+## now for charting
+df_chart <-  df %>% 
+  filter(mmwr_year==2020) #%>% 
+  #filter(state!="US")
+
+df_chart %>% 
+  #filter(state %in% mar_counties) %>% 
+  filter(mmwr_week %in% weeks_in) %>% 
+  filter(state %in% states_list) %>% 
+  ggplot(aes(week_end, obs)) +
+  geom_ribbon(aes(ymin=lpi, ymax=upi), fill="gray70", alpha=.8) +
+  geom_line(color="firebrick", size=.5) +
+  facet_wrap(~state, ncol=5, scales="free_y") +
+  labs(title="State excess Alzheimer disease and dementia") +
+  theme_minimal()
+
+kable(mar_summary, format.args = list(big.mark = ","))
+
+
+mar_summary$type <- "alzheimer disease"
+write_csv(mar_summary, "alzheimer_disease.csv")
+```
+
+
+## Malignant neoplasms
+
+```{r cerebrovascular_diseases, fig.width=8, fig.height=2.2, warning=F, message=F}
+df <- causes %>%
+    filter(type=="Malignant neoplasms")
+
+mar <- df %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week %in% weeks_march) %>% 
+  mutate(excess_is=case_when(
+    obs < lpi ~ "Lower than range",
+    obs > upi ~ "Higher than range",
+    TRUE ~ "Within the range"
+  )) %>%
+  arrange(desc(unexplained.cases)) %>% 
+  rename(deaths=obs,
+         `excess deaths`=unexplained.cases,
+         expected=pred,
+         `expected upper range`=upi,
+         `expected lower range`=lpi
+  ) 
+
+mar_summary <- mar %>% 
+  filter(state %in% states_list) %>% 
+  group_by(state) %>% 
+  summarize(deaths=sum(deaths),
+          `excess deaths`=sum(`excess deaths`))
+
+#mar_states <- mar %>% 
+ # filter(excess_is=="Higher than range") %>% 
+#  pull(state)
+
+## now for charting
+df_chart <-  df %>% 
+  filter(mmwr_year==2020) #%>% 
+  #filter(state!="US")
+
+df_chart %>% 
+  #filter(state %in% mar_counties) %>% 
+  filter(mmwr_week %in% weeks_in) %>% 
+  filter(state %in% states_list) %>% 
+  ggplot(aes(week_end, obs)) +
+  geom_ribbon(aes(ymin=lpi, ymax=upi), fill="gray70", alpha=.8) +
+  geom_line(color="firebrick", size=.5) +
+  facet_wrap(~state, ncol=6, scales="free_y") +
+  labs(title="State excess malignant neoplasms") +
+  theme_minimal()
+
+kable(mar_summary, format.args = list(big.mark = ","))
+```
+
+
+## Respiratory diseases
+
+```{r Hypertensive_diseases, fig.width=8, fig.height=2.2, warning=F, message=F}
+df <- causes %>%
+    filter(type=="Respiratory diseases")
+
+mar <- df %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week %in% weeks_march) %>% 
+  mutate(excess_is=case_when(
+    obs < lpi ~ "Lower than range",
+    obs > upi ~ "Higher than range",
+    TRUE ~ "Within the range"
+  )) %>%
+  arrange(desc(unexplained.cases)) %>% 
+  rename(deaths=obs,
+         `excess deaths`=unexplained.cases,
+         expected=pred,
+         `expected upper range`=upi,
+         `expected lower range`=lpi
+  ) 
+
+mar_summary <- mar %>% 
+  filter(state %in% states_list) %>% 
+  group_by(state) %>% 
+  summarize(deaths=sum(deaths),
+          `excess deaths`=sum(`excess deaths`))
+
+#mar_states <- mar %>% 
+ # filter(excess_is=="Higher than range") %>% 
+#  pull(state)
+
+## now for charting
+df_chart <-  df %>% 
+  filter(mmwr_year==2020) #%>% 
+  #filter(state!="US")
+
+df_chart %>% 
+  #filter(state %in% mar_counties) %>% 
+  filter(mmwr_week %in% weeks_in) %>% 
+  filter(state %in% states_list) %>% 
+  ggplot(aes(week_end, obs)) +
+  geom_ribbon(aes(ymin=lpi, ymax=upi), fill="gray70", alpha=.8) +
+  geom_line(color="firebrick", size=.5) +
+  facet_wrap(~state, ncol=6, scales="free_y") +
+  labs(title="State excess Respiratory diseases") +
+  theme_minimal()
+
+kable(mar_summary, format.args = list(big.mark = ","))
+```
+
+
+## Residual (all other natural causes)
+
+```{r ischemic, fig.width=8, fig.height=2.2, warning=F, message=F}
+df <- causes %>%
+    filter(type=="Residual (all other natural causes)")
+
+mar <- df %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week %in% weeks_march) %>% 
+  mutate(excess_is=case_when(
+    obs < lpi ~ "Lower than range",
+    obs > upi ~ "Higher than range",
+    TRUE ~ "Within the range"
+  )) %>%
+  arrange(desc(unexplained.cases)) %>% 
+  rename(deaths=obs,
+         `excess deaths`=unexplained.cases,
+         expected=pred,
+         `expected upper range`=upi,
+         `expected lower range`=lpi
+  ) 
+
+mar_summary <- mar %>% 
+  filter(state %in% states_list) %>% 
+  group_by(state) %>% 
+  summarize(deaths=sum(deaths),
+          `excess deaths`=sum(`excess deaths`))
+
+#mar_states <- mar %>% 
+ # filter(excess_is=="Higher than range") %>% 
+#  pull(state)
+
+## now for charting
+df_chart <-  df %>% 
+  filter(mmwr_year==2020) #%>% 
+  #filter(state!="US")
+
+df_chart %>% 
+  #filter(state %in% mar_counties) %>% 
+  filter(mmwr_week %in% weeks_in) %>% 
+  filter(state %in% states_list) %>% 
+  ggplot(aes(week_end, obs)) +
+  geom_ribbon(aes(ymin=lpi, ymax=upi), fill="gray70", alpha=.8) +
+  geom_line(color="firebrick", size=.5) +
+  facet_wrap(~state, ncol=6, scales="free_y") +
+  labs(title="State excess Residual (all other natural causes)") +
+  theme_minimal()
+
+kable(mar_summary, format.args = list(big.mark = ","))
+```
+
+
+## Other select causes
+
+```{r other_heart, fig.width=8, fig.height=2.2, warning=F, message=F}
+df <- causes %>%
+    filter(type=="Other select causes")
+
+mar <- df %>% 
+  filter(mmwr_year==2020) %>% 
+  filter(mmwr_week %in% weeks_march) %>% 
+  mutate(excess_is=case_when(
+    obs < lpi ~ "Lower than range",
+    obs > upi ~ "Higher than range",
+    TRUE ~ "Within the range"
+  )) %>%
+  arrange(desc(unexplained.cases)) %>% 
+  rename(deaths=obs,
+         `excess deaths`=unexplained.cases,
+         expected=pred,
+         `expected upper range`=upi,
+         `expected lower range`=lpi
+  ) 
+
+mar_summary <- mar %>% 
+  filter(state %in% states_list) %>% 
+  group_by(state) %>% 
+  summarize(deaths=sum(deaths),
+          `excess deaths`=sum(`excess deaths`))
+
+#mar_states <- mar %>% 
+ # filter(excess_is=="Higher than range") %>% 
+#  pull(state)
+
+## now for charting
+df_chart <-  df %>% 
+  filter(mmwr_year==2020) #%>% 
+  #filter(state!="US")
+
+df_chart %>% 
+  #filter(state %in% mar_counties) %>% 
+  filter(mmwr_week %in% weeks_in) %>% 
+  filter(state %in% states_list) %>% 
+  ggplot(aes(week_end, obs)) +
+  geom_ribbon(aes(ymin=lpi, ymax=upi), fill="gray70", alpha=.8) +
+  geom_line(color="firebrick", size=.5) +
+  facet_wrap(~state, ncol=6, scales="free_y") +
+  labs(title="State excess Other select causes") +
+  theme_minimal()
+
+kable(mar_summary, format.args = list(big.mark = ","))
+```
+

@@ -6,7 +6,7 @@ source('specific_causes/00_format_table.R')
 
 states_list <- c("NY", "NYC", "IL", "MA", "NJ", "MI")
 
-#specific_causes <- c("diseases_of_heart_i00_i09", "alzheimer_disease_g30", "cerebrovascular_diseases", "diabetes_mellitus_e10_e14")
+specific_causes <- c("diseases_of_heart_i00_i09", "alzheimer_disease_g30", "cerebrovascular_diseases", "diabetes_mellitus_e10_e14")
 
 # run 01_all_causes.R to generate the spreadsheet below
 
@@ -17,8 +17,8 @@ causes_join$one <- 1
 causes_join <- causes_join %>% 
   filter(state %in% states_list)
 
-#causes_join <- causes_join %>% 
-#  filter(type %in% specific_causes)
+causes_join <- causes_join %>% 
+  filter(type %in% specific_causes)
 
 type_list <- unique(causes_join$type)
 
@@ -45,7 +45,8 @@ for (i in 1:length(type_list)) {
                 model.type="negbin",
                 time.res="week",
                 stage1.samples=1000,
-                stage2.samples=1)
+                stage2.samples=1,
+                extend.epiyear=TRUE)
   
   ds <- excess_cause
   dates1 <-

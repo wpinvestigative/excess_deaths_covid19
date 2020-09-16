@@ -4,7 +4,8 @@ data/jags_results/*
 data/provisional_pi/*
 !data/provisional_pi/.gitkeep
 
-
+# projects in progress
+not_public_yet/*
 
 # .ds_store
 .DS_Store

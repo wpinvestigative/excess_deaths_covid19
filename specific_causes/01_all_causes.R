@@ -7,7 +7,7 @@ library(geofacet)
 library(lubridate)
 library(janitor)
 
-week_max <- 23
+week_max <- 30
 
 weeks_df <- read_csv("specific_causes/weeks.csv")
 weeks_df <- weeks_df %>% 
@@ -57,7 +57,7 @@ causes_1920 <- read_csv("https://data.cdc.gov/api/views/muzy-jte6/rows.csv?acces
          chronic_lower_respiratory=chronic_lower_respiratory_diseases_j40_j47 , symptoms_signs_and_abnormal=symptoms_signs_and_abnormal_clinical_and_laboratory_findings_not_elsewhere_classified_r00_r99,
          diseases_of_heart_i00_i09=diseases_of_heart_i00_i09_i11_i13_i20_i51, cerebrovascular_diseases=cerebrovascular_diseases_i60_i69 ,
          septicemia_a40_a41, diabetes_mellitus_e10_e14,
-         influenza_and_pneumonia_j10=influenza_and_pneumonia_j10_j18,
+         influenza_and_pneumonia_j10=influenza_and_pneumonia_j09_j18,
          other_diseases_of_respiratory=other_diseases_of_respiratory_system_j00_j06_j30_j39_j67_j70_j98,
          nephritis_nephrotic_syndrome=nephritis_nephrotic_syndrome_and_nephrosis_n00_n07_n17_n19_n25_n27,
          covid19_multiple_causes_of_death=covid_19_u071_multiple_cause_of_death,
